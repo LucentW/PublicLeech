@@ -29,12 +29,14 @@ from tobrot.helper_funcs.upload_to_tg import upload_to_tg
 async def youtube_dl_call_back(bot, update):
     LOGGER.info(update)
     cb_data = update.data
+    LOGGER.info(cb_data)
     # youtube_dl extractors
     tg_send_type, youtube_dl_format, youtube_dl_ext, so_type = cb_data.split("|")
     #
     current_user_id = update.message.reply_to_message.from_user.id
-    current_message_id = update.message.reply_to_message
-    current_message_id = current_message_id.message_id
+    # current_message_id = update.message.reply_to_message
+    # current_message_id = current_message_id.message_id
+    current_message_id = update.message.message_id
     current_touched_user_id = update.from_user.id
 
     user_working_dir = os.path.join(
@@ -42,8 +44,9 @@ async def youtube_dl_call_back(bot, update):
         str(current_user_id),
         str(current_message_id)
     )
-    # create download directory, if not exist
+
     if not os.path.isdir(user_working_dir):
+        LOGGER.info("no workdir?")
         await bot.delete_messages(
             chat_id=update.message.chat.id,
             message_ids=[
@@ -53,6 +56,7 @@ async def youtube_dl_call_back(bot, update):
             revoke=True
         )
         return
+
     save_ytdl_json_path = user_working_dir + \
         "/" + str("ytdleech") + ".json"
     try:
@@ -60,6 +64,7 @@ async def youtube_dl_call_back(bot, update):
             response_json = json.load(f)
         os.remove(save_ytdl_json_path)
     except (FileNotFoundError) as e:
+        LOGGER.info("error opening json " + save_ytdl_json_path)
         await bot.delete_messages(
             chat_id=update.message.chat.id,
             message_ids=[
@@ -142,7 +147,7 @@ async def youtube_dl_call_back(bot, update):
     #
     if "hotstar" in youtube_dl_url:
         command_to_exec.append("--geo-bypass-country")
-        command_to_exec.append("IN")
+        command_to_exec.append("IT")
     LOGGER.info(command_to_exec)
     start = datetime.now()
     process = await asyncio.create_subprocess_exec(
